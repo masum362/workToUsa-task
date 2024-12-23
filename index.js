@@ -38,6 +38,29 @@ async function postLaunchData(launchData) {
   }
 }
 
+// Function to handle retries for recoverable errors.
+async function retryWithBackoff(postFn, maxRetries = 3, baseDelay = 1000) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await postFn();
+    } catch (error) {
+      // Skip retry for 403 errors
+      if (error.message.includes("403")) {
+        console.log("Skipping retry for 403 error");
+        throw error;
+      }
+
+      // On last retry, throw the error
+      if (i === maxRetries - 1) throw error;
+
+      // Calculate exponential backoff delay
+      const delay = baseDelay * Math.pow(2, i);
+      console.log(`Retry attempt ${i + 1} after ${delay}ms`);
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
 // Express route to handle launch data submission
 app.post("/api/launches", async (req, res) => {
   try {
@@ -55,7 +78,7 @@ app.post("/api/launches", async (req, res) => {
     }
 
     // Post the launch data
-    const result = await postLaunchData(launchData);
+    const result = await retryWithBackoff(() => postLaunchData(launchData));
 
     res.status(201).json({
       message: "Launch data posted successfully",
