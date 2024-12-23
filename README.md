@@ -17,17 +17,16 @@ A Node.js/Express API that handles posting launch data to an external API with r
 
 ## Installation
 
-1. Clone the repository or create a new directory:
+1. Clone the repository:
 
 ```bash
-mkdir launch-api
-cd launch-api
+git clone https://github.com/masum362/workToUsa-task.git
+cd workToUsa-task
 ```
 
 2. Install dependencies:
 
 ```bash
-npm init -y
 npm install
 ```
 
